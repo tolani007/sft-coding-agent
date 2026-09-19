@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sft-coding-agent"
+version = "0.1.0"
+description = "Supervised fine-tuning pipeline for coding agents on Pi-Mono traces."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+dependencies = [
+    "transformers>=4.52.0",
+    "trl>=0.18.0",
+    "peft>=0.15.0",
+    "datasets>=3.6.0",
+    "accelerate>=1.6.0",
+    "bitsandbytes>=0.45.0",
+    "huggingface_hub[cli]>=0.30.0",
+    "trackio>=0.2.0",
+    "pandas",
+    "safetensors",
+    "pyyaml"
+]
+
+[project.optional-dependencies]
+colab = [
+    "ipywidgets",
+]
+eval = [
+    "pytest",
+]

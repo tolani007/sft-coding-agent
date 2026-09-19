@@ -1,0 +1,8 @@
+data/
+checkpoints/
+logs/
+__pycache__/
+.env
+*.pyc
+wandb/
+.ipynb_checkpoints/
