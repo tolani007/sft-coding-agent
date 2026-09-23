@@ -275,6 +275,34 @@ def load_burtenshaw(path: str) -> list[dict]:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# SOURCE 5: my-agy-traces (Personal Antigravity sessions exported by export_my_traces.py)
+# ─────────────────────────────────────────────────────────────────────────────
+def load_my_traces(path: str, max_tokens: int = 24000) -> list[dict]:
+    """Load your personalized SFT traces."""
+    examples = []
+    skipped = 0
+    if not os.path.exists(path):
+        return []
+    
+    with open(path) as f:
+        for line in f:
+            obj = json.loads(line)
+            msgs = obj.get('messages', [])
+            if len(msgs) < 3:
+                continue
+                
+            est = estimate_tokens(msgs)
+            if est > max_tokens:
+                skipped += 1
+                continue
+                
+            examples.append({"messages": msgs, "source": "my-agy-traces"})
+            
+    print(f"  my-agy-traces: {len(examples)} loaded, {skipped} skipped (over {max_tokens} tokens)")
+    return examples
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # MAIN
 # ─────────────────────────────────────────────────────────────────────────────
 def main():
@@ -310,6 +338,11 @@ def main():
     
     # 4. Burtenshaw (already preprocessed)
     all_examples.extend(load_burtenshaw("data/train.jsonl"))
+    
+    # 5. Personal traces
+    personal_path = "data/raw/all_my_traces.jsonl"
+    if os.path.exists(personal_path):
+        all_examples.extend(load_my_traces(personal_path, args.max_tokens))
     
     # Deduplicate
     seen = set()
