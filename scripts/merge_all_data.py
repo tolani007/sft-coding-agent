@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-merge_all_data.py — Combine all downloaded datasets into unified train/eval splits.
+merge_all_data.py - Combine all downloaded datasets into unified train/eval splits.
 
 This script handles 4 different data sources with different formats and merges
 them into a single train.jsonl and eval.jsonl ready for SFTTrainer.
 
-LEARNING INSIGHT — Why combine multiple datasets?
+LEARNING INSIGHT - Why combine multiple datasets?
   Each dataset teaches the model different skills:
   - vojtavlas2/pi-agent-traces-sft: Full agent sessions with <think>, tool_calls, errors
   - badlogicgames/pi-mono: Raw real-world coding sessions (needs conversion)
@@ -254,7 +254,7 @@ def load_pi_mono_chat(path: str) -> list[dict]:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SOURCE 4: burtenshaw/sft-on-traces (Codex format — use preprocess.py output)
+# SOURCE 4: burtenshaw/sft-on-traces (Codex format - use preprocess.py output)
 # ─────────────────────────────────────────────────────────────────────────────
 def load_burtenshaw(path: str) -> list[dict]:
     """Load the already-preprocessed burtenshaw example."""

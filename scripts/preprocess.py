@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-preprocess.py — Convert Pi-Mono/Codex agent traces to SFT training format.
+preprocess.py - Convert Pi-Mono/Codex agent traces to SFT training format.
 
 WHAT THIS SCRIPT DOES (read this before running!):
 ==================================================
@@ -21,7 +21,7 @@ We convert this into the chat format SFTTrainer expects:
     {"role": "assistant", "content": "Done! The model has been trained."},
   ]}
 
-CRITICAL LEARNING POINT — Loss Masking:
+CRITICAL LEARNING POINT - Loss Masking:
   During training, SFTTrainer will apply DataCollatorForCompletionOnlyLM.
   This masks ALL tokens except assistant turns.
   Tokens with label=-100 contribute ZERO gradient.
@@ -36,14 +36,14 @@ CRITICAL LEARNING POINT — Loss Masking:
 HOW THE TRACE MAPS TO CHAT FORMAT:
   Raw event type           → Chat role
   ─────────────────────────────────────────────────
-  session_meta             → (skip — metadata only)
-  event_msg/task_started   → (skip — bookkeeping)
+  session_meta             → (skip - metadata only)
+  event_msg/task_started   → (skip - bookkeeping)
   event_msg/user_message   → user
   response_item/message    → assistant (phase=commentary)
   response_item/function_call → assistant tool_calls
   response_item/function_call_output → tool
-  response_item/reasoning  → (skip — encrypted, not trainable)
-  turn_context             → (skip — retrieval context)
+  response_item/reasoning  → (skip - encrypted, not trainable)
+  turn_context             → (skip - retrieval context)
 """
 
 import json
@@ -55,7 +55,7 @@ import argparse
 from pathlib import Path
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SYSTEM PROMPT — This defines the agent's identity and tool schemas.
+# SYSTEM PROMPT - This defines the agent's identity and tool schemas.
 # The model sees this at position 0 of every conversation.
 # ─────────────────────────────────────────────────────────────────────────────
 SYSTEM_PROMPT = """You are an expert coding agent with access to the following tools:
@@ -76,7 +76,7 @@ Before taking action, reason about the task. Then call the appropriate tool.
 After receiving tool results, continue reasoning and acting until the task is complete."""
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PRIVACY PATTERNS — Redact anything that looks like a secret.
+# PRIVACY PATTERNS - Redact anything that looks like a secret.
 # pi-share-hf should already handle this, but we double-check.
 # ─────────────────────────────────────────────────────────────────────────────
 SECRET_PATTERNS = [
@@ -167,7 +167,7 @@ def events_to_chat(events: list[dict]) -> dict | None:
                     messages.append({"role": "assistant", "content": text})
         
         # ── Tool call emitted by the model ────────────────────────────────
-        # LEARNING NOTE: This is a TARGET TOKEN — the model must learn to 
+        # LEARNING NOTE: This is a TARGET TOKEN - the model must learn to 
         # generate these. It will receive gradient updates here.
         elif etype == 'response_item' and ptype == 'function_call':
             call_id  = payload.get('call_id', '')
@@ -196,7 +196,7 @@ def events_to_chat(events: list[dict]) -> dict | None:
             pending_tool_calls[call_id] = len(messages) - 1
         
         # ── Tool output (environment response) ────────────────────────────
-        # LEARNING NOTE: This is a MASKED token — the model should NOT try to
+        # LEARNING NOTE: This is a MASKED token - the model should NOT try to
         # predict bash stdout. label=-100 means ZERO gradient here.
         elif etype == 'response_item' and ptype == 'function_call_output':
             call_id = payload.get('call_id', '')
@@ -319,7 +319,7 @@ def main():
         stats['converted'] += 1
     
     if not examples:
-        print('\n⚠️  No examples produced. The file may contain only one large session.')
+        print('\n  No examples produced. The file may contain only one large session.')
         print('Writing it as a single training example...')
         # Try treating the whole file as one session
         chat = events_to_chat(all_events)
@@ -351,7 +351,7 @@ def main():
     print('PREPROCESSING COMPLETE')
     print('='*50)
     print(f"  Raw events:          {stats['total']} sessions")
-    print(f"  ✅ Converted:         {stats['converted']}")
+    print(f"   Converted:         {stats['converted']}")
     print(f"  ❌ Too short:         {stats['filtered_too_short']}")
     print(f"  ❌ Too long:          {stats['filtered_too_long']}")
     print(f"  ❌ No structure:      {stats['filtered_no_structure']}")
@@ -376,8 +376,8 @@ def main():
         print()
         est = estimate_tokens(msgs)
         print(f'  Estimated tokens: ~{est:,}')
-        print(f'\n  ✅ Token masking will apply to all [tool] and [user] and [system] tokens.')
-        print(f'  ✅ Gradient will flow ONLY through [assistant] tokens.')
+        print(f'\n   Token masking will apply to all [tool] and [user] and [system] tokens.')
+        print(f'   Gradient will flow ONLY through [assistant] tokens.')
 
 
 if __name__ == '__main__':

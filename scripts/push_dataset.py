@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-push_dataset.py — Push local processed JSONL data to Hugging Face Hub
+push_dataset.py - Push local processed JSONL data to Hugging Face Hub
 
 Google Colab runs in the cloud and cannot directly access your Mac's hard drive.
 To train on Colab, we first upload our 6,600+ compiled examples to the Hugging Face Hub.
@@ -45,5 +45,5 @@ print(f"  Test:  {len(dataset['test'])} examples")
 print(f"\nUploading to https://huggingface.co/datasets/{REPO_NAME} ...")
 dataset.push_to_hub(REPO_NAME, token=HF_TOKEN, private=False)
 
-print("\n✅ Dataset successfully pushed!")
+print("\n Dataset successfully pushed!")
 print(f"You can now load it in Colab using: load_dataset('{REPO_NAME}')")

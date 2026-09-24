@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-download_all_datasets.py — Download and merge all coding agent datasets for SFT training.
+download_all_datasets.py - Download and merge all coding agent datasets for SFT training.
 
 DATASETS WE USE AND WHY EACH ONE MATTERS:
 ==========================================
@@ -8,25 +8,25 @@ DATASETS WE USE AND WHY EACH ONE MATTERS:
 1. burtenshaw/sft-on-traces (HF Bucket)
    - What: Ben Burtenshaw's own curated SFT example from his livestream
    - Format: Codex/OpenAI-style event stream (response_item, function_call, etc.)
-   - Size: 1 example (~150K tokens) — Ben's complete agent session
+   - Size: 1 example (~150K tokens) - Ben's complete agent session
    - Why use it: Gold-standard example showing professional agent workflow end-to-end
-   - ⚠️ Already downloaded as data/raw/example.jsonl
+   -  Already downloaded as data/raw/example.jsonl
 
 2. badlogicgames/pi-mono (HF Dataset)
    - What: 627 real coding sessions from Mario Zechner (creator of the Pi coding agent)
    - Format: Pi native format (session, message, compaction, branch_summary events)
    - Size: 224.8 MB across 627 JSONL files
    - Why use it: Raw, real-world coding traces covering bugs, features, refactors
-   - ⚠️ Different format from burtenshaw — needs its own parser branch
+   -  Different format from burtenshaw - needs its own parser branch
 
 3. sergiopaniego/pi-mono-chat (HF Dataset)
    - What: 797 train + 89 test pre-formatted (user, assistant) pairs from Pi sessions
-   - Format: Standard {"messages": [{"role": ..., "content": ...}]} — NO tool calls
-   - Size: ~940 KB — small but clean
+   - Format: Standard {"messages": [{"role": ..., "content": ...}]} - NO tool calls
+   - Size: ~940 KB - small but clean
    - Why use it: Easy to merge, provides conversational (non-tool) coding knowledge
-   - ⚠️ No tool calls — useful for response quality, not tool-use learning
+   -  No tool calls - useful for response quality, not tool-use learning
 
-LEARNING INSIGHT — Why use all three?
+LEARNING INSIGHT - Why use all three?
    Diverse data → robust generalization. The model sees:
    - Professional OpenAI Codex-style agentic sessions (burtenshaw)
    - Native Pi agent sessions with rich tool use (pi-mono)  
@@ -104,23 +104,23 @@ def download_file(url: str, dest: Path, label: str = "") -> int:
             return len(data)
         except Exception as e:
             if attempt == 2:
-                print(f"  ⚠️  Failed to download {label}: {e}")
+                print(f"    Failed to download {label}: {e}")
                 return 0
             time.sleep(2 ** attempt)
     return 0
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# DATASET 1 — burtenshaw/sft-on-traces (already downloaded)
+# DATASET 1 - burtenshaw/sft-on-traces (already downloaded)
 # ─────────────────────────────────────────────────────────────────────────────
 def check_burtenshaw_traces():
     dest = RAW_DIR / "example.jsonl"
     if dest.exists():
         size = dest.stat().st_size
-        print(f"✅ burtenshaw/sft-on-traces: already downloaded ({size/1e6:.2f} MB)")
+        print(f" burtenshaw/sft-on-traces: already downloaded ({size/1e6:.2f} MB)")
         return True
     
-    print("📥 Downloading burtenshaw/sft-on-traces/example.jsonl ...")
+    print(" Downloading burtenshaw/sft-on-traces/example.jsonl ...")
     url = "https://huggingface.co/buckets/burtenshaw/sft-on-traces/resolve/example.jsonl"
     n = download_file(url, dest, "sft-on-traces")
     print(f"   → {n/1e6:.2f} MB downloaded")
@@ -128,7 +128,7 @@ def check_burtenshaw_traces():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# DATASET 2 — badlogicgames/pi-mono (627 raw JSONL files)
+# DATASET 2 - badlogicgames/pi-mono (627 raw JSONL files)
 # ─────────────────────────────────────────────────────────────────────────────
 def download_pi_mono(max_files: int = None, min_size_bytes: int = 5000):
     """
@@ -149,7 +149,7 @@ def download_pi_mono(max_files: int = None, min_size_bytes: int = 5000):
     pi_mono_dir = RAW_DIR / "pi-mono"
     pi_mono_dir.mkdir(exist_ok=True)
     
-    print("\n📥 Downloading badlogicgames/pi-mono ...")
+    print("\n Downloading badlogicgames/pi-mono ...")
     print("   Getting file list...")
     
     files_data = hf_get_json(
@@ -195,21 +195,21 @@ def download_pi_mono(max_files: int = None, min_size_bytes: int = 5000):
     
     actual_files = list(pi_mono_dir.glob("*.jsonl"))
     actual_size = sum(f.stat().st_size for f in actual_files)
-    print(f"✅ badlogicgames/pi-mono: {len(actual_files)} files, {actual_size/1e6:.1f} MB total")
+    print(f" badlogicgames/pi-mono: {len(actual_files)} files, {actual_size/1e6:.1f} MB total")
     return len(actual_files)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# DATASET 3 — sergiopaniego/pi-mono-chat (pre-formatted chat, via parquet)
+# DATASET 3 - sergiopaniego/pi-mono-chat (pre-formatted chat, via parquet)
 # ─────────────────────────────────────────────────────────────────────────────
 def download_pi_mono_chat():
     """
     Download sergiopaniego/pi-mono-chat and convert to JSONL.
     
     This dataset is already in {"messages": [{"role":..., "content":...}]} format.
-    No tool calls — pure user/assistant coding conversations derived from Pi sessions.
+    No tool calls - pure user/assistant coding conversations derived from Pi sessions.
     
-    LEARNING NOTE: This is what pi-mono sessions look like AFTER distillation — 
+    LEARNING NOTE: This is what pi-mono sessions look like AFTER distillation - 
     the long multi-turn tool-heavy traces have been compressed into clean 
     user→assistant pairs. Great for teaching conversational style, less so for 
     tool-use mechanics.
@@ -217,10 +217,10 @@ def download_pi_mono_chat():
     dest = RAW_DIR / "pi-mono-chat.jsonl"
     if dest.exists() and dest.stat().st_size > 10000:
         size = dest.stat().st_size
-        print(f"✅ sergiopaniego/pi-mono-chat: already downloaded ({size/1e3:.0f} KB)")
+        print(f" sergiopaniego/pi-mono-chat: already downloaded ({size/1e3:.0f} KB)")
         return True
     
-    print("\n📥 Downloading sergiopaniego/pi-mono-chat ...")
+    print("\n Downloading sergiopaniego/pi-mono-chat ...")
     
     examples = []
     for split in ["train", "test"]:
@@ -263,7 +263,7 @@ def download_pi_mono_chat():
         for ex in examples:
             f.write(json.dumps(ex) + "\n")
     
-    print(f"✅ sergiopaniego/pi-mono-chat: {len(examples)} examples → {dest}")
+    print(f" sergiopaniego/pi-mono-chat: {len(examples)} examples → {dest}")
     return len(examples)
 
 
@@ -280,7 +280,7 @@ def main():
     args = parser.parse_args()
 
     print("=" * 60)
-    print("SFT CODING AGENT — Dataset Downloader")
+    print("SFT CODING AGENT - Dataset Downloader")
     print("=" * 60)
     print(f"Output directory: {RAW_DIR.absolute()}")
     print()

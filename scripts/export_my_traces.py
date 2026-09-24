@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-export_my_traces.py — Export your Antigravity (AGY) coding agent session transcripts
+export_my_traces.py - Export your Antigravity (AGY) coding agent session transcripts
                       as SFT-ready training data for fine-tuning coding SLMs.
 
 WHY THIS MATTERS FOR CONTINUAL LEARNING:
@@ -38,7 +38,7 @@ from pathlib import Path
 from datetime import datetime
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PRIVACY — Comprehensive PII & Secret Redaction
+# PRIVACY - Comprehensive PII & Secret Redaction
 # Run this on EVERY text field before saving. Better to over-redact than leak.
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -69,7 +69,7 @@ PII_PATTERNS = [
     re.compile(r'(?:https?://)?(?:[a-z0-9]+@)?github\.com[:/]\S+\.git'), # Git remote URLs with usernames
 ]
 
-# Path patterns — anonymize home directory usernames
+# Path patterns - anonymize home directory usernames
 PATH_PATTERNS = [
     (re.compile(r'/Users/[a-zA-Z0-9._-]+/'), r'/Users/user/'),      # macOS
     (re.compile(r'/home/[a-zA-Z0-9._-]+/'), r'/home/user/'),         # Linux
@@ -226,7 +226,7 @@ def convert_agy_transcript(transcript_path: str, redact: bool = True) -> list[di
                                     'ask_question', 'generate_image'):
                             continue
                         
-                        # Clean args — remove toolAction/toolSummary metadata
+                        # Clean args - remove toolAction/toolSummary metadata
                         clean_args = {
                             k: v for k, v in args.items()
                             if k not in ('toolAction', 'toolSummary')
@@ -408,7 +408,7 @@ def main():
     print(f"  Total tokens:  ~{total_tokens:,}")
     print(f"  Tool calls:    {tool_call_count}")
     print(f"  Output:        {args.output}")
-    print(f"  Secrets:       {'NOT redacted ⚠️' if args.no_redact else 'Redacted ✅'}")
+    print(f"  Secrets:       {'NOT redacted ' if args.no_redact else 'Redacted '}")
     print(f"\n  To include in training, re-run:")
     print(f"    python3 scripts/merge_all_data.py")
 
