@@ -49,4 +49,19 @@ The files are in `hf_space_files/`. Hugging Face charges per hour for a GPU. The
 ## 8. Limits of These Tests
 * HumanEval tests single functions. It does not test long agent work with many tool steps.
 * The format test uses only 5 tasks. It shows if the format is correct. It does not show if the agent is smart.
-* The Inspect AI script in `scripts/evaluate_agent.py` is a first draft. Its scorer compares text and does not run unit tests. I do not use it for scores until I fix it.
+* The Inspect AI script in `scripts/evaluate_agent.py` now runs the official unit tests. I checked the scorer with two fake answers. The perfect answers scored 100 percent. The bad answers scored 0 percent. This shows the scorer works.
+* I have not run the script on the real model yet. I must do this on a GPU machine.
+
+## 9. How to Run the Inspect AI Script
+My model on the Hub is a LoRA adapter. It sits on top of the base model `google/gemma-2-9b-it`. This base model needs access. I must accept the license on the Hugging Face page and use my token.
+
+Steps on a GPU machine:
+1. Install the tools: `pip install inspect-ai transformers peft accelerate torch`
+2. Set my token: `export HF_TOKEN=<my token>`
+3. Run a small test first: `inspect eval scripts/evaluate_agent.py --model hf/focustiki/eigentiki --limit 10`
+4. Run the full test: `inspect eval scripts/evaluate_agent.py --model hf/focustiki/eigentiki`
+5. Open the result viewer: `inspect view`
+
+To use Docker for the sandbox, add `-T sandbox=docker`. Docker is safer, because the model code runs in a closed box.
+
+Note on vLLM: vLLM is faster. But it needs a merged model, not an adapter. I do not need it for 164 problems.

@@ -74,7 +74,7 @@ cells.append(code("""
 import re, json, subprocess, tempfile, os
 from datasets import load_dataset
 
-problems = load_dataset("openai_humaneval", split="test")
+problems = load_dataset("openai/openai_humaneval", split="test")
 print("HumanEval problems:", len(problems))
 
 def ask_model(user_text, max_new_tokens=768):
